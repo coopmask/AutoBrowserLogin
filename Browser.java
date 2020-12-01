@@ -1,42 +1,67 @@
-import java.awt.Desktop;
-import java.awt.desktop.*;
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.safari.SafariDriver;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.Keys;
 
 public class Browser {
     public static void main(String[] args) {
 
-        String ICON_url = "https://icon.uiowa.edu";
-        String outlook_url = "https://outlook.live.com/owa/";
-        String first_reddit_url = "https://www.reddit.com/r/Jaguars/";
-        String second_reddit_url = "https://www.reddit.com/r/uiowa/";
-        String third_reddit_url = "https://www.reddit.com/r/javahelp/";
-        String weather_url = "https://www.accuweather.com/en/us/minooka/60447/weather-forecast/2241505";
-        String scitechdaily_url = "https://scitechdaily.com";
-
-        if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
-            Desktop desktop = Desktop.getDesktop();
+        String url1 = "https://icon.uiowa.edu";
+        String url2 = "https://www.office.com/";
+        String url3 = "https://scitechdaily.com";
+            
             try {
-                desktop.browse(new URI(ICON_url));
-                TimeUnit.SECONDS.sleep(2);
-                desktop.browse(new URI(outlook_url));
-                TimeUnit.SECONDS.sleep(2);
-                desktop.browse(new URI(first_reddit_url));
-                TimeUnit.SECONDS.sleep(2);
-                desktop.browse(new URI(second_reddit_url));
-                TimeUnit.SECONDS.sleep(2);
-                desktop.browse(new URI(third_reddit_url));
-                TimeUnit.SECONDS.sleep(2);
-                desktop.browse(new URI(weather_url));
-                TimeUnit.SECONDS.sleep(2);
-                desktop.browse(new URI(scitechdaily_url));
-                TimeUnit.SECONDS.sleep(2);
+
+                WebDriver driver = new SafariDriver();
+                driver.manage().window().maximize();
+                driver.get(url1);
+
+                String main_tab = driver.getWindowHandle();
                 
-            } catch (IOException | InterruptedException | URISyntaxException e) {
+                ArrayList<String> tabs = new ArrayList<String>();
+                tabs.add(url2);
+                tabs.add(url3);
+
+                JavascriptExecutor js = (JavascriptExecutor) driver;
+                
+                for (String tab : tabs) {
+                    js.executeScript("window.open();");
+
+                    ArrayList<String> open = new ArrayList<>(driver.getWindowHandles());
+                    open.remove(main_tab);
+
+                    for (String opened : open) {
+                        String current_url = driver.getCurrentUrl();
+                        if (!main_tab.equalsIgnoreCase(opened) && !opened.equals(current_url)) {
+                            TimeUnit.SECONDS.sleep(2);
+                            driver.switchTo().window(opened);
+                            TimeUnit.SECONDS.sleep(2);
+                            driver.get(tab);
+                            TimeUnit.SECONDS.sleep(2);
+                            open.remove(opened);
+                            break;
+                        }
+                    }
+                }
+
+                driver.switchTo().window(main_tab);
+                WebDriverWait wait = new WebDriverWait(driver, 20);
+                wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("login"))).click();
+                wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("hawkid"))).sendKeys("cmaskel");
+                
+                Actions action= new Actions(driver);
+                action.keyDown(Keys.CONTROL).sendKeys(Keys.TAB).build().perform();
+            }
+
+            catch (InterruptedException e) {
                 e.printStackTrace();
-            } 
-        }
-    }
-}
+         }
+     } 
+ }
+    
