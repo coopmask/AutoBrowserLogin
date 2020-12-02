@@ -9,6 +9,13 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Keys;
 
+/*
+Browser class opens and accesses the three URLs and enters information to 
+the first URl's login page and then traverses to the "home page," which
+is the second URL for personal access. Libraries mainly used include Selenium
+WebDriver and SafariDriver, Actions, By, and TimeUnit. 
+*/
+
 public class Browser {
     public static void main(String[] args) {
 
@@ -28,11 +35,14 @@ public class Browser {
                 tabs.add(url2);
                 tabs.add(url3);
 
+                // JavaScript driver is used to effectively open necessary tabs
                 JavascriptExecutor js = (JavascriptExecutor) driver;
                 
                 for (String tab : tabs) {
                     js.executeScript("window.open();");
 
+                    // The open ArrayList is initialized with each URL's handles in order to 
+                    // pass through and open each URL in order
                     ArrayList<String> open = new ArrayList<>(driver.getWindowHandles());
                     open.remove(main_tab);
 
@@ -55,10 +65,12 @@ public class Browser {
                 wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("login"))).click();
                 wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("hawkid"))).sendKeys("cmaskel");
                 
+                // Actions is used to perform the TAB operation to get to the second URL, or "home page"
                 Actions action= new Actions(driver);
                 action.keyDown(Keys.CONTROL).sendKeys(Keys.TAB).build().perform();
             }
 
+            // Catches an error for the TimeUnit.SECONDS.sleep() actions
             catch (InterruptedException e) {
                 e.printStackTrace();
          }
